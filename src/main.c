@@ -1,6 +1,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_keycode.h>
+#include <SDL3/SDL_mouse.h>
 #include <SDL3/SDL_oldnames.h>
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_timer.h>
@@ -89,17 +90,6 @@ void draw_grid(SDL_Renderer *renderer)
 }
 
 
-void handle_mouse(SDL_Event *event)
-{
-    if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
-
-        int grid_x = event->button.x / CELL_SIZE;
-        int grid_y = event->button.y / CELL_SIZE;
-
-        grid[grid_x][grid_y] = !grid[grid_x][grid_y];
-    }
-}
-
 int main(void)
 {
     // Initialise SDL
@@ -136,6 +126,7 @@ int main(void)
     SDL_Event event;
     int running = 1;
     int paused = 1;
+    int mouse_button = 0;
 
     while (running) {
 
@@ -147,13 +138,45 @@ int main(void)
                 running = 0;
             }
 
+            if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+
+                mouse_button = event.button.button;
+            }
+
+            if (event.type == SDL_EVENT_MOUSE_BUTTON_UP) {
+
+                mouse_button = 0;
+            }
+
+            // DRAW ON DRAG
+            if (event.type == SDL_EVENT_MOUSE_MOTION && mouse_button) {
+
+                int grid_x = event.motion.x / CELL_SIZE;
+                int grid_y = event.motion.y / CELL_SIZE;
+
+                if (mouse_button == SDL_BUTTON_LEFT) {
+                    grid[grid_x][grid_y] = 1;
+                }
+
+                if (mouse_button == SDL_BUTTON_RIGHT) {
+                    grid[grid_x][grid_y] = 0;
+                }
+            }
+
+            // FLIP ON LEFT CLICK
+            if (mouse_button == SDL_BUTTON_LEFT && event.type != SDL_EVENT_MOUSE_MOTION) {
+
+                int grid_x = event.motion.x / CELL_SIZE;
+                int grid_y = event.motion.y / CELL_SIZE;
+
+                    grid[grid_x][grid_y] = !grid[grid_x][grid_y];
+                }
+
             if(event.type == SDL_EVENT_KEY_DOWN) {
                 if(event.key.key == SDLK_SPACE) {
                     paused = !paused;
                 }
             }
-
-            handle_mouse(&event);
         }
 
         // MAIN LOOP CODE HERE
@@ -163,6 +186,8 @@ int main(void)
         }
 
         draw_grid(renderer);
+
+        // 16ms delay for ~60 fps
         SDL_Delay(16);
 
     }
