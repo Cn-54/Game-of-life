@@ -2,9 +2,13 @@
 
 int main(void)
 {
-    SDL_Init(SDL_INIT_VIDEO);
+    // Initialise SDL
+    if (!SDL_Init(SDL_INIT_VIDEO)) {
+        SDL_Log("SDL_Init failed: %s", SDL_GetError());
+        return 1;
+    }
 
-    // create window
+    // Create window
     SDL_Window *window = SDL_CreateWindow(
         "SDL Test",
         800,
@@ -12,19 +16,32 @@ int main(void)
         0
     );
 
-    // create renderer
-    SDL_Renderer *renderer =
-        SDL_CreateRenderer(window, NULL);
+    if (window == NULL) {
+        SDL_Log("SDL_CreateWindow failed: %s", SDL_GetError());
+        SDL_Quit();
+        return 1;
+    }
 
-    
-        // create main loop and event handler
+    // Create renderer
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, NULL);
+
+    if (renderer == NULL) {
+        SDL_Log("SDL_CreateRenderer failed: %s", SDL_GetError());
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return 1;
+    }
+
+    // Main loop and event handler
     SDL_Event event;
     int running = 1;
 
     while (running) {
 
-        // close button
+        // Handle events
         while (SDL_PollEvent(&event)) {
+
+            // Close button
             if (event.type == SDL_EVENT_QUIT) {
                 running = 0;
             }
@@ -33,10 +50,11 @@ int main(void)
         // MAIN LOOP CODE HERE
 
 
-        //
+        // Present renderer
+        SDL_RenderPresent(renderer);
     }
 
-    // close window
+    // Cleanup
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
