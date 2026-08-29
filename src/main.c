@@ -1,4 +1,5 @@
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_render.h>
 
 #define WIDTH 80
 #define HEIGHT 60
@@ -7,21 +8,31 @@
 int grid[HEIGHT][WIDTH];
 int next_grid[HEIGHT][WIDTH];
 
+int count_neighbours(int x, int y)
+{
+    int count = 0;
+
+    for (int dx = -1; dx <= 1; dx++) {
+        for (int dy = -1; dy <= 1; dy++) {
+
+            if (dx == 0 && dy == 0)
+                continue;
+
+            int nx = (x + dx + WIDTH) % WIDTH;
+            int ny = (y + dy + HEIGHT) % HEIGHT;
+
+            count += grid[nx][ny];
+        }
+    }
+
+    return count;
+}
+
 void update_grid(){
     for(int x = 0;x < WIDTH;x++){
        for(int y = 0;y < HEIGHT;y++){
             // count neighbours
-            int count = 0;
-            count += grid[x-1][y-1];
-            count += grid[x][y-1];
-            count += grid[x+1][y-1];
-
-            count += grid[x-1][y];
-            count += grid[x+1][y];
-
-            count += grid[x-1][y+1];
-            count += grid[x][y+1];
-            count += grid[x+1][y+1];
+            int count = count_neighbours( x,  y);
 
             // update grid based on neighbour count
             if (grid[x][y] == 1) {
@@ -41,6 +52,30 @@ void update_grid(){
     }
 }
 
+void draw_grid(SDL_Renderer *renderer)
+{
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderClear(renderer);
+
+    for (int x = 0; x < WIDTH; x++) {
+        for (int y = 0; y < HEIGHT; y++) {
+
+            if (grid[x][y] == 1) {
+
+                SDL_FRect cell = {
+                    x * CELL_SIZE,
+                    y * CELL_SIZE,
+                    CELL_SIZE,
+                    CELL_SIZE
+                };
+
+                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+                SDL_RenderFillRect(renderer, &cell);
+            }
+        }
+    }
+    SDL_RenderPresent(renderer);
+}
 
 int main(void)
 {
@@ -90,10 +125,12 @@ int main(void)
         }
 
         // MAIN LOOP CODE HERE
+        
+        update_grid();
 
+        draw_grid(renderer);
 
-        // Present renderer
-        SDL_RenderPresent(renderer);
+        // 
     }
 
     // Cleanup
