@@ -110,7 +110,7 @@ int main(void)
 
     // Create window
     SDL_Window *window = SDL_CreateWindow(
-        "SDL Test",
+        "Game of Life",
         800,
         600,
         0
