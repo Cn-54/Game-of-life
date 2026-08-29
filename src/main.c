@@ -13,6 +13,15 @@
 int grid[WIDTH][HEIGHT];
 int next_grid[WIDTH][HEIGHT];
 
+void clear_grid(){
+    for(int x = 0;x < WIDTH;x++){
+        for(int y = 0;y < HEIGHT;y++){
+            grid[x][y] = 0;
+            next_grid[x][y] = 0;
+        }
+    }
+}
+
 int count_neighbours(int x, int y)
 {
     int count = 0;
@@ -175,6 +184,9 @@ int main(void)
             if(event.type == SDL_EVENT_KEY_DOWN) {
                 if(event.key.key == SDLK_SPACE) {
                     paused = !paused;
+                }
+                if(event.key.key == SDLK_R){
+                    clear_grid();
                 }
             }
         }
