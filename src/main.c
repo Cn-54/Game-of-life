@@ -1,5 +1,47 @@
 #include <SDL3/SDL.h>
 
+#define WIDTH 80
+#define HEIGHT 60
+#define CELL_SIZE 10
+
+int grid[HEIGHT][WIDTH];
+int next_grid[HEIGHT][WIDTH];
+
+void update_grid(){
+    for(int x = 0;x < WIDTH;x++){
+       for(int y = 0;y < HEIGHT;y++){
+            // count neighbours
+            int count = 0;
+            count += grid[x-1][y-1];
+            count += grid[x][y-1];
+            count += grid[x+1][y-1];
+
+            count += grid[x-1][y];
+            count += grid[x+1][y];
+
+            count += grid[x-1][y+1];
+            count += grid[x][y+1];
+            count += grid[x+1][y+1];
+
+            // update grid based on neighbour count
+            if (grid[x][y] == 1) {
+                if (count == 2 || count == 3) {
+                    next_grid[x][y] = 1;
+                } else {
+                    next_grid[x][y] = 0;
+                }
+            } else {
+                if (count == 3) {
+                    next_grid[x][y] = 1;
+                } else {
+                    next_grid[x][y] = 0;
+                }
+            }
+        }
+    }
+}
+
+
 int main(void)
 {
     // Initialise SDL
