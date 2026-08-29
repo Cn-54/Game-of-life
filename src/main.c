@@ -1,12 +1,16 @@
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_events.h>
+#include <SDL3/SDL_keycode.h>
+#include <SDL3/SDL_oldnames.h>
 #include <SDL3/SDL_render.h>
+#include <SDL3/SDL_timer.h>
 
 #define WIDTH 80
 #define HEIGHT 60
 #define CELL_SIZE 10
 
-int grid[HEIGHT][WIDTH];
-int next_grid[HEIGHT][WIDTH];
+int grid[WIDTH][HEIGHT];
+int next_grid[WIDTH][HEIGHT];
 
 int count_neighbours(int x, int y)
 {
@@ -50,6 +54,13 @@ void update_grid(){
             }
         }
     }
+
+    // set grid to next grid
+    for (int x = 0; x < WIDTH; x++) {
+        for (int y = 0; y < HEIGHT; y++) {
+            grid[x][y] = next_grid[x][y];
+        }
+    }
 }
 
 void draw_grid(SDL_Renderer *renderer)
@@ -75,6 +86,18 @@ void draw_grid(SDL_Renderer *renderer)
         }
     }
     SDL_RenderPresent(renderer);
+}
+
+
+void handle_mouse(SDL_Event *event)
+{
+    if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+
+        int grid_x = event->button.x / CELL_SIZE;
+        int grid_y = event->button.y / CELL_SIZE;
+
+        grid[grid_x][grid_y] = !grid[grid_x][grid_y];
+    }
 }
 
 int main(void)
@@ -112,6 +135,7 @@ int main(void)
     // Main loop and event handler
     SDL_Event event;
     int running = 1;
+    int paused = 1;
 
     while (running) {
 
@@ -122,15 +146,25 @@ int main(void)
             if (event.type == SDL_EVENT_QUIT) {
                 running = 0;
             }
+
+            if(event.type == SDL_EVENT_KEY_DOWN) {
+                if(event.key.key == SDLK_SPACE) {
+                    paused = !paused;
+                }
+            }
+
+            handle_mouse(&event);
         }
 
         // MAIN LOOP CODE HERE
         
-        update_grid();
+        if (!paused) {
+            update_grid();
+        }
 
         draw_grid(renderer);
+        SDL_Delay(16);
 
-        // 
     }
 
     // Cleanup
