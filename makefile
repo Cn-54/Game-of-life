@@ -6,14 +6,15 @@ LIBS = $(shell pkg-config --libs sdl3)
 TARGET = bin/main
 
 SRC = $(wildcard src/*.c)
-OBJ = $(patsubst src/%.c, bin/%.o, $(SRC))
+OBJ = $(patsubst src/%.c, obj/%.o, $(SRC))
 
 $(TARGET): $(OBJ)
+	mkdir -p bin
 	$(CC) $(OBJ) -o $(TARGET) $(LIBS)
 
-bin/%.o: src/%.c
-	mkdir -p bin
+obj/%.o: src/%.c
+	mkdir -p obj
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf bin
+	rm -rf bin obj
